@@ -28,5 +28,16 @@ namespace WindowsServiceManager
             ServicesDataGrid.ItemsSource = ServiceHandler.GetInstance().services.GetRange(0,5);
             this.DataContext = ServiceHandler.GetInstance();
         }
+
+        private async void OnClickStart(object sender, RoutedEventArgs e)
+        {
+            var service = ServicesDataGrid.SelectedItem as Service;
+            var result = await ServiceHandler.StartService(service);
+        }
+        private async void OnClickStop(object sender, RoutedEventArgs e)
+        {
+            var service = ServicesDataGrid.SelectedItem as Service;
+            var result = await ServiceHandler.StopService(service);
+        }
     }
 }

@@ -36,15 +36,26 @@ namespace WindowsServiceManager.Models
         {
             serviceControllers = ServiceController.GetServices().ToList();
         }
-        public ServiceControllerStatus StopService(ServiceController service)
+        public async Task UpdateServiceListAsync()
         {
-            service.Stop();
-            return service.Status;
+            await Task.Run(() => serviceControllers = ServiceController.GetServices().ToList());
         }
-        public ServiceControllerStatus StartService(ServiceController service)
+
+        //TODO: start and stop services _service LINQ to be populated with more search criteria
+        public static async Task<ServiceControllerStatus> StartService(Service? service)
         {
-            service.Start();
-            return service.Status;
+            var handler = ServiceHandler.GetInstance();
+            var _service = handler.serviceControllers.Where(x => x.DisplayName == service.displayName).FirstOrDefault();
+            await Task.Delay(5000);
+            await Task.Run(() => _service.Start());
+            return _service.Status;
+        }
+        public static async Task<ServiceControllerStatus> StopService(Service? service)
+        {
+            var handler = ServiceHandler.GetInstance();
+            var _service = handler.serviceControllers.Where(x => x.DisplayName == service.displayName).FirstOrDefault();
+            await Task.Run(() => _service.Stop());
+            return _service.Status;
         }
     }
 }

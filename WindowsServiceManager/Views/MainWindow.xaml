@@ -20,8 +20,12 @@
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Content="Start Service" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="80"/>
-            <Button Grid.Column="2" Content="Stop Service" HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="80"/>
+            <Button Name="StartServiceButton"  Grid.Column="1" Content="Start Service" 
+                    HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="80"
+                    Click="OnClickStart"/>
+            <Button Name="StopServiceButton" Grid.Column="2" Content="Stop Service" 
+                    HorizontalAlignment="Center" Height="20" VerticalAlignment="Center" Width="80"
+                    Click="OnClickStop"/>
         </Grid>
         
     </Grid>
