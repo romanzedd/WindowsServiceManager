@@ -18,13 +18,7 @@ namespace WindowsServiceManager.Models
         {
             this.serviceControllers = ServiceController.GetServices().ToList();
             this.services = new List<Service>();
-            foreach (var serviceController in this.serviceControllers)
-            {
-                services.Add(new Service(serviceController.ServiceName,
-                                         serviceController.DisplayName, 
-                                         serviceController.Status.ToString(), 
-                                         serviceController.MachineName));
-            }
+            ServiceConverter(services, serviceControllers);
         }
 
         public static ServiceHandler GetInstance()
@@ -32,30 +26,72 @@ namespace WindowsServiceManager.Models
             return instance;
         }
 
+        private static void ServiceConverter(List<Service> services, List<ServiceController> serviceControllers)
+        {
+            foreach (var serviceController in serviceControllers)
+            {
+                services.Add(new Service(serviceController.ServiceName,
+                                         serviceController.DisplayName,
+                                         serviceController.Status.ToString(),
+                                         serviceController.MachineName));
+            }
+        }
+
         public void UpdateServiceList()
         {
             serviceControllers = ServiceController.GetServices().ToList();
+            services.RemoveAll(x => true);
+            ServiceConverter(services, serviceControllers);
         }
         public async Task UpdateServiceListAsync()
         {
             await Task.Run(() => serviceControllers = ServiceController.GetServices().ToList());
+            services.RemoveAll(x => true);
+            await Task.Run(() => ServiceConverter(services, serviceControllers));
         }
 
-        //TODO: start and stop services _service LINQ to be populated with more search criteria
-        public static async Task<ServiceControllerStatus> StartService(Service? service)
+        private static ServiceController GetServiceController(Service? service)
         {
             var handler = ServiceHandler.GetInstance();
-            var _service = handler.serviceControllers.Where(x => x.DisplayName == service.displayName).FirstOrDefault();
-            await Task.Delay(5000);
-            await Task.Run(() => _service.Start());
-            return _service.Status;
+            var _service = handler.serviceControllers.Where(x => x.DisplayName == service?.displayName &&
+                                                                 x.ServiceName == service?.name &&
+                                                                 x.MachineName == service?.account).FirstOrDefault();
+            return _service;
         }
-        public static async Task<ServiceControllerStatus> StopService(Service? service)
+
+        public static async Task<string> StartService(Service? _service)
         {
-            var handler = ServiceHandler.GetInstance();
-            var _service = handler.serviceControllers.Where(x => x.DisplayName == service.displayName).FirstOrDefault();
-            await Task.Run(() => _service.Stop());
-            return _service.Status;
+            var service = GetServiceController(_service);
+            if (service is null) return "Error: Service not found";
+            try
+            {
+                await Task.Run(() => service.Start());
+                await Task.Run(() => service.WaitForStatus(ServiceControllerStatus.Running));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return ex.Message;
+            }
+
+            await ServiceHandler.GetInstance().UpdateServiceListAsync();
+            return String.Concat("OK\n", service.Status.ToString());
+        }
+        public static async Task<string> StopService(Service? _service)
+        {
+            var service = GetServiceController(_service);
+            if (service is null) return "Error: Service not found";
+            try
+            {
+                await Task.Run(() => service.Stop());
+                await Task.Run(() => service.WaitForStatus(ServiceControllerStatus.Stopped));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return ex.Message;
+            }
+
+            await ServiceHandler.GetInstance().UpdateServiceListAsync();
+            return String.Concat("OK\n", service.Status.ToString());
         }
     }
 }

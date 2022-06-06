@@ -8,10 +8,10 @@ namespace WindowsServiceManager.Models
 {
     public class Service
     {
-        internal string name { get; set; }
-        internal string displayName { get; set; }
-        internal string status { get; set; }
-        internal string account { get; set; }
+        public string name { get; set; }
+        public string displayName { get; set; }
+        public string status { get; set; }
+        public string account { get; set; }
 
         public Service(string name, string displayName, string status, string account)
         {
