@@ -28,8 +28,6 @@ namespace WindowsServiceManager
 
             ServicesDataGrid.ItemsSource = ServiceHandler.GetInstance().services;
             this.DataContext = ServiceHandler.GetInstance();
-            //var dataUpdateThread = new Thread(BackgroundDataUpdater);
-            //dataUpdateThread.Start();
         }
 
         private async void OnClickStart(object sender, RoutedEventArgs e)
@@ -49,20 +47,6 @@ namespace WindowsServiceManager
 
             ServicesDataGrid.ItemsSource = ServiceHandler.GetInstance().services;
             ServicesDataGrid.Items.Refresh();
-        }
-        private void BackgroundDataUpdater()
-        {
-            while (1 < 2)
-            {
-                lock (this)
-                {
-                    ServiceHandler.GetInstance().UpdateServiceList();
-                    ServicesDataGrid.ItemsSource = ServiceHandler.GetInstance().services;
-                    ServicesDataGrid.Items.Refresh();
-                }
-                
-                Thread.Sleep(5000);
-            }
         }
     }
 }

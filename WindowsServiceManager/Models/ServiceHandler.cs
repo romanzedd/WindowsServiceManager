@@ -70,6 +70,7 @@ namespace WindowsServiceManager.Models
             }
             catch (InvalidOperationException ex)
             {
+                await ServiceHandler.GetInstance().UpdateServiceListAsync();
                 return ex.Message;
             }
 
@@ -87,6 +88,7 @@ namespace WindowsServiceManager.Models
             }
             catch (InvalidOperationException ex)
             {
+                await ServiceHandler.GetInstance().UpdateServiceListAsync();
                 return ex.Message;
             }
 
